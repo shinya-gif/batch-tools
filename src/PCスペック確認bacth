@@ -1,0 +1,41 @@
+@echo off
+setlocal
+
+set "psfile=%TEMP%\show_specs.ps1"
+
+(
+echo $OutputFile = "$env:TEMP\pcspecs.txt"
+echo "=== 基本情報 ===" ^| Out-File -FilePath $OutputFile -Encoding Default
+echo systeminfo ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo "" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== CPU情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_Processor ^| Select Name,NumberOfCores,NumberOfLogicalProcessors ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== メモリ情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_PhysicalMemory ^| Select Capacity,Manufacturer,Speed ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== マザーボード情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_BaseBoard ^| Select Manufacturer,Product ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== BIOS情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_BIOS ^| Select Manufacturer,SMBIOSBIOSVersion,ReleaseDate ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== ディスク情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_DiskDrive ^| Select Model,Size,InterfaceType ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== GPU情報 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_VideoController ^| Select Name ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo "=== シリアル番号 ===" ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+echo Get-CimInstance Win32_BIOS ^| Select SerialNumber ^| Out-String ^| Out-File -FilePath $OutputFile -Append -Encoding Default
+
+echo Start-Process notepad.exe $OutputFile -Wait
+echo Remove-Item $OutputFile
+) > "%psfile%"
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%psfile%"
+
+del "%psfile%"
+
+endlocal
